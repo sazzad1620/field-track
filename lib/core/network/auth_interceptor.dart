@@ -7,11 +7,10 @@ import 'package:field_track/features/auth/data/models/auth_session_model.dart';
 
 class AuthInterceptor extends QueuedInterceptor {
   AuthInterceptor({
-    required AuthLocalDatasource local,
-    required Dio dio,
-  })  : _local = local,
-        _dio = dio {
-    _refreshDio = Dio(dio.options);
+    required this._local,
+    required this._dio,
+  }) {
+    _refreshDio = Dio(_dio.options);
   }
 
   final AuthLocalDatasource _local;

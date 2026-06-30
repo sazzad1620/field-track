@@ -882,6 +882,424 @@ class PendingSyncItemsCompanion extends UpdateCompanion<PendingSyncItem> {
   }
 }
 
+class $LocationItemsTable extends LocationItems
+    with TableInfo<$LocationItemsTable, LocationItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocationItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _locationNameMeta = const VerificationMeta(
+    'locationName',
+  );
+  @override
+  late final GeneratedColumn<String> locationName = GeneratedColumn<String>(
+    'location_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _radiusMMeta = const VerificationMeta(
+    'radiusM',
+  );
+  @override
+  late final GeneratedColumn<int> radiusM = GeneratedColumn<int>(
+    'radius_m',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    locationName,
+    latitude,
+    longitude,
+    radiusM,
+    isActive,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'location_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocationItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('location_name')) {
+      context.handle(
+        _locationNameMeta,
+        locationName.isAcceptableOrUnknown(
+          data['location_name']!,
+          _locationNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_locationNameMeta);
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_latitudeMeta);
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_longitudeMeta);
+    }
+    if (data.containsKey('radius_m')) {
+      context.handle(
+        _radiusMMeta,
+        radiusM.isAcceptableOrUnknown(data['radius_m']!, _radiusMMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_radiusMMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isActiveMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocationItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocationItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      locationName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_name'],
+      )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      )!,
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      )!,
+      radiusM: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}radius_m'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+    );
+  }
+
+  @override
+  $LocationItemsTable createAlias(String alias) {
+    return $LocationItemsTable(attachedDatabase, alias);
+  }
+}
+
+class LocationItem extends DataClass implements Insertable<LocationItem> {
+  final String id;
+  final String locationName;
+  final double latitude;
+  final double longitude;
+  final int radiusM;
+  final bool isActive;
+  const LocationItem({
+    required this.id,
+    required this.locationName,
+    required this.latitude,
+    required this.longitude,
+    required this.radiusM,
+    required this.isActive,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['location_name'] = Variable<String>(locationName);
+    map['latitude'] = Variable<double>(latitude);
+    map['longitude'] = Variable<double>(longitude);
+    map['radius_m'] = Variable<int>(radiusM);
+    map['is_active'] = Variable<bool>(isActive);
+    return map;
+  }
+
+  LocationItemsCompanion toCompanion(bool nullToAbsent) {
+    return LocationItemsCompanion(
+      id: Value(id),
+      locationName: Value(locationName),
+      latitude: Value(latitude),
+      longitude: Value(longitude),
+      radiusM: Value(radiusM),
+      isActive: Value(isActive),
+    );
+  }
+
+  factory LocationItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocationItem(
+      id: serializer.fromJson<String>(json['id']),
+      locationName: serializer.fromJson<String>(json['locationName']),
+      latitude: serializer.fromJson<double>(json['latitude']),
+      longitude: serializer.fromJson<double>(json['longitude']),
+      radiusM: serializer.fromJson<int>(json['radiusM']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'locationName': serializer.toJson<String>(locationName),
+      'latitude': serializer.toJson<double>(latitude),
+      'longitude': serializer.toJson<double>(longitude),
+      'radiusM': serializer.toJson<int>(radiusM),
+      'isActive': serializer.toJson<bool>(isActive),
+    };
+  }
+
+  LocationItem copyWith({
+    String? id,
+    String? locationName,
+    double? latitude,
+    double? longitude,
+    int? radiusM,
+    bool? isActive,
+  }) => LocationItem(
+    id: id ?? this.id,
+    locationName: locationName ?? this.locationName,
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
+    radiusM: radiusM ?? this.radiusM,
+    isActive: isActive ?? this.isActive,
+  );
+  LocationItem copyWithCompanion(LocationItemsCompanion data) {
+    return LocationItem(
+      id: data.id.present ? data.id.value : this.id,
+      locationName: data.locationName.present
+          ? data.locationName.value
+          : this.locationName,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      radiusM: data.radiusM.present ? data.radiusM.value : this.radiusM,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocationItem(')
+          ..write('id: $id, ')
+          ..write('locationName: $locationName, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('radiusM: $radiusM, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, locationName, latitude, longitude, radiusM, isActive);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocationItem &&
+          other.id == this.id &&
+          other.locationName == this.locationName &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.radiusM == this.radiusM &&
+          other.isActive == this.isActive);
+}
+
+class LocationItemsCompanion extends UpdateCompanion<LocationItem> {
+  final Value<String> id;
+  final Value<String> locationName;
+  final Value<double> latitude;
+  final Value<double> longitude;
+  final Value<int> radiusM;
+  final Value<bool> isActive;
+  final Value<int> rowid;
+  const LocationItemsCompanion({
+    this.id = const Value.absent(),
+    this.locationName = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.radiusM = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocationItemsCompanion.insert({
+    required String id,
+    required String locationName,
+    required double latitude,
+    required double longitude,
+    required int radiusM,
+    required bool isActive,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       locationName = Value(locationName),
+       latitude = Value(latitude),
+       longitude = Value(longitude),
+       radiusM = Value(radiusM),
+       isActive = Value(isActive);
+  static Insertable<LocationItem> custom({
+    Expression<String>? id,
+    Expression<String>? locationName,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<int>? radiusM,
+    Expression<bool>? isActive,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (locationName != null) 'location_name': locationName,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (radiusM != null) 'radius_m': radiusM,
+      if (isActive != null) 'is_active': isActive,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocationItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? locationName,
+    Value<double>? latitude,
+    Value<double>? longitude,
+    Value<int>? radiusM,
+    Value<bool>? isActive,
+    Value<int>? rowid,
+  }) {
+    return LocationItemsCompanion(
+      id: id ?? this.id,
+      locationName: locationName ?? this.locationName,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      radiusM: radiusM ?? this.radiusM,
+      isActive: isActive ?? this.isActive,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (locationName.present) {
+      map['location_name'] = Variable<String>(locationName.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (radiusM.present) {
+      map['radius_m'] = Variable<int>(radiusM.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocationItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('locationName: $locationName, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('radiusM: $radiusM, ')
+          ..write('isActive: $isActive, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -889,6 +1307,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PendingSyncItemsTable pendingSyncItems = $PendingSyncItemsTable(
     this,
   );
+  late final $LocationItemsTable locationItems = $LocationItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -896,6 +1315,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     todoItems,
     pendingSyncItems,
+    locationItems,
   ];
 }
 
@@ -1360,6 +1780,227 @@ typedef $$PendingSyncItemsTableProcessedTableManager =
       PendingSyncItem,
       PrefetchHooks Function()
     >;
+typedef $$LocationItemsTableCreateCompanionBuilder =
+    LocationItemsCompanion Function({
+      required String id,
+      required String locationName,
+      required double latitude,
+      required double longitude,
+      required int radiusM,
+      required bool isActive,
+      Value<int> rowid,
+    });
+typedef $$LocationItemsTableUpdateCompanionBuilder =
+    LocationItemsCompanion Function({
+      Value<String> id,
+      Value<String> locationName,
+      Value<double> latitude,
+      Value<double> longitude,
+      Value<int> radiusM,
+      Value<bool> isActive,
+      Value<int> rowid,
+    });
+
+class $$LocationItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocationItemsTable> {
+  $$LocationItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get locationName => $composableBuilder(
+    column: $table.locationName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get radiusM => $composableBuilder(
+    column: $table.radiusM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocationItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocationItemsTable> {
+  $$LocationItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get locationName => $composableBuilder(
+    column: $table.locationName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get radiusM => $composableBuilder(
+    column: $table.radiusM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocationItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocationItemsTable> {
+  $$LocationItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get locationName => $composableBuilder(
+    column: $table.locationName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<int> get radiusM =>
+      $composableBuilder(column: $table.radiusM, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+}
+
+class $$LocationItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocationItemsTable,
+          LocationItem,
+          $$LocationItemsTableFilterComposer,
+          $$LocationItemsTableOrderingComposer,
+          $$LocationItemsTableAnnotationComposer,
+          $$LocationItemsTableCreateCompanionBuilder,
+          $$LocationItemsTableUpdateCompanionBuilder,
+          (
+            LocationItem,
+            BaseReferences<_$AppDatabase, $LocationItemsTable, LocationItem>,
+          ),
+          LocationItem,
+          PrefetchHooks Function()
+        > {
+  $$LocationItemsTableTableManager(_$AppDatabase db, $LocationItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocationItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocationItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocationItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> locationName = const Value.absent(),
+                Value<double> latitude = const Value.absent(),
+                Value<double> longitude = const Value.absent(),
+                Value<int> radiusM = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocationItemsCompanion(
+                id: id,
+                locationName: locationName,
+                latitude: latitude,
+                longitude: longitude,
+                radiusM: radiusM,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String locationName,
+                required double latitude,
+                required double longitude,
+                required int radiusM,
+                required bool isActive,
+                Value<int> rowid = const Value.absent(),
+              }) => LocationItemsCompanion.insert(
+                id: id,
+                locationName: locationName,
+                latitude: latitude,
+                longitude: longitude,
+                radiusM: radiusM,
+                isActive: isActive,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocationItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocationItemsTable,
+      LocationItem,
+      $$LocationItemsTableFilterComposer,
+      $$LocationItemsTableOrderingComposer,
+      $$LocationItemsTableAnnotationComposer,
+      $$LocationItemsTableCreateCompanionBuilder,
+      $$LocationItemsTableUpdateCompanionBuilder,
+      (
+        LocationItem,
+        BaseReferences<_$AppDatabase, $LocationItemsTable, LocationItem>,
+      ),
+      LocationItem,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1368,4 +2009,6 @@ class $AppDatabaseManager {
       $$TodoItemsTableTableManager(_db, _db.todoItems);
   $$PendingSyncItemsTableTableManager get pendingSyncItems =>
       $$PendingSyncItemsTableTableManager(_db, _db.pendingSyncItems);
+  $$LocationItemsTableTableManager get locationItems =>
+      $$LocationItemsTableTableManager(_db, _db.locationItems);
 }

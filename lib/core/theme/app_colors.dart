@@ -17,4 +17,6 @@ class AppColors {
   static const Color pendingBadgeText = Color(0xFFC8821A);
   static const Color navInactive = Color(0xFF98A2B2);
   static const Color progressTrack = Color(0xFFF1F4F7);
+  static const Color pinActive = Color(0xFF0B6B62);
+  static const Color placeholder = Color(0xFF8A94A3);
 }

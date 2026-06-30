@@ -7,6 +7,11 @@ import 'package:field_track/features/auth/data/datasources/auth_local_datasource
 import 'package:field_track/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:field_track/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:field_track/features/auth/domain/repositories/auth_repository.dart';
+import 'package:field_track/features/geofence/domain/geofence_registry.dart';
+import 'package:field_track/features/locations/data/datasources/location_local_datasource.dart';
+import 'package:field_track/features/locations/data/datasources/location_remote_datasource.dart';
+import 'package:field_track/features/locations/data/repositories/location_repository_impl.dart';
+import 'package:field_track/features/locations/domain/repositories/location_repository.dart';
 import 'package:field_track/features/todos/data/database/app_database.dart';
 import 'package:field_track/features/todos/data/datasources/todo_local_datasource.dart';
 import 'package:field_track/features/todos/data/datasources/todo_remote_datasource.dart';
@@ -72,6 +77,32 @@ Future<void> setupInjection() async {
   if (!sl.isRegistered<TodoRepository>()) {
     sl.registerLazySingleton<TodoRepository>(
       () => TodoRepositoryImpl(remote: sl(), local: sl(), connectivity: sl()),
+    );
+  }
+
+  if (!sl.isRegistered<GeofenceRegistry>()) {
+    sl.registerLazySingleton<GeofenceRegistry>(GeofenceRegistryStub.new);
+  }
+
+  if (!sl.isRegistered<LocationRemoteDatasource>()) {
+    sl.registerLazySingleton<LocationRemoteDatasource>(
+      () => LocationRemoteDatasource(sl()),
+    );
+  }
+
+  if (!sl.isRegistered<LocationLocalDatasource>()) {
+    sl.registerLazySingleton<LocationLocalDatasource>(
+      () => LocationLocalDatasource(sl()),
+    );
+  }
+
+  if (!sl.isRegistered<LocationRepository>()) {
+    sl.registerLazySingleton<LocationRepository>(
+      () => LocationRepositoryImpl(
+        remote: sl(),
+        local: sl(),
+        geofenceRegistry: sl(),
+      ),
     );
   }
 

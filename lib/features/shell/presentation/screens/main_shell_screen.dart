@@ -7,7 +7,9 @@ import 'package:field_track/core/widgets/nested_bottom_nav.dart';
 import 'package:field_track/features/home/presentation/bloc/home_bloc.dart';
 import 'package:field_track/features/home/presentation/bloc/home_event.dart';
 import 'package:field_track/features/home/presentation/bloc/home_state.dart';
-import 'package:field_track/features/locations/presentation/screens/locations_placeholder_screen.dart';
+import 'package:field_track/features/locations/presentation/bloc/location_list_bloc.dart';
+import 'package:field_track/features/locations/presentation/bloc/location_list_event.dart';
+import 'package:field_track/features/locations/presentation/screens/location_list_screen.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_bloc.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_event.dart';
 import 'package:field_track/features/todos/presentation/screens/sync_screen.dart';
@@ -41,6 +43,9 @@ class _MainShellScreenState extends State<MainShellScreen> {
           create: (_) => TodoListBloc(sl())..add(const TodoListStarted()),
         ),
         BlocProvider(
+          create: (_) => LocationListBloc(sl())..add(const LocationListStarted()),
+        ),
+        BlocProvider(
           create: (_) => HomeBloc(sl())..add(const HomeStarted()),
         ),
       ],
@@ -59,7 +64,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
               index: _index,
               children: const [
                 TodoListScreen(),
-                LocationsPlaceholderScreen(),
+                LocationListScreen(),
                 SyncScreen(),
                 _ProfileTab(),
               ],
