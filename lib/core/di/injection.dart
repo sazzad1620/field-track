@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:field_track/core/network/auth_interceptor.dart';
 import 'package:field_track/core/network/dio_client.dart';
@@ -6,6 +7,11 @@ import 'package:field_track/features/auth/data/datasources/auth_local_datasource
 import 'package:field_track/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:field_track/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:field_track/features/auth/domain/repositories/auth_repository.dart';
+import 'package:field_track/features/todos/data/database/app_database.dart';
+import 'package:field_track/features/todos/data/datasources/todo_local_datasource.dart';
+import 'package:field_track/features/todos/data/datasources/todo_remote_datasource.dart';
+import 'package:field_track/features/todos/data/repositories/todo_repository_impl.dart';
+import 'package:field_track/features/todos/domain/repositories/todo_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +46,32 @@ Future<void> setupInjection() async {
   if (!sl.isRegistered<AuthRepository>()) {
     sl.registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(remote: sl(), local: sl()),
+    );
+  }
+
+  if (!sl.isRegistered<AppDatabase>()) {
+    sl.registerLazySingleton<AppDatabase>(AppDatabase.new);
+  }
+
+  if (!sl.isRegistered<TodoLocalDatasource>()) {
+    sl.registerLazySingleton<TodoLocalDatasource>(
+      () => TodoLocalDatasource(sl()),
+    );
+  }
+
+  if (!sl.isRegistered<TodoRemoteDatasource>()) {
+    sl.registerLazySingleton<TodoRemoteDatasource>(
+      () => TodoRemoteDatasource(sl()),
+    );
+  }
+
+  if (!sl.isRegistered<Connectivity>()) {
+    sl.registerLazySingleton<Connectivity>(Connectivity.new);
+  }
+
+  if (!sl.isRegistered<TodoRepository>()) {
+    sl.registerLazySingleton<TodoRepository>(
+      () => TodoRepositoryImpl(remote: sl(), local: sl(), connectivity: sl()),
     );
   }
 

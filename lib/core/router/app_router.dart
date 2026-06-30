@@ -1,7 +1,7 @@
 import 'package:field_track/core/router/app_routes.dart';
 import 'package:field_track/features/auth/presentation/screens/login_screen.dart';
 import 'package:field_track/features/auth/presentation/screens/register_screen.dart';
-import 'package:field_track/features/home/presentation/screens/home_screen.dart';
+import 'package:field_track/features/shell/presentation/screens/main_shell_screen.dart';
 import 'package:field_track/features/splash/presentation/screens/splash_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,7 +23,7 @@ GoRouter createAppRouter() {
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const MainShellScreen(),
       ),
     ],
   );

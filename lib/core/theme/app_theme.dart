@@ -1,10 +1,13 @@
 import 'package:field_track/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static ThemeData get lightTheme => _buildTheme();
 
   static ThemeData _buildTheme() {
+    final inter = GoogleFonts.interTextTheme();
+
     const colorScheme = ColorScheme.light(
       primary: AppColors.primary,
       onPrimary: AppColors.surface,
@@ -22,19 +25,20 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.background,
-      textTheme: const TextTheme(
-        headlineMedium: TextStyle(
+      fontFamily: GoogleFonts.inter().fontFamily,
+      textTheme: inter.copyWith(
+        headlineMedium: inter.headlineMedium?.copyWith(
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
           letterSpacing: -0.48,
         ),
-        bodyMedium: TextStyle(
+        bodyMedium: inter.bodyMedium?.copyWith(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.textMuted,
         ),
-        labelMedium: TextStyle(
+        labelMedium: inter.labelMedium?.copyWith(
           fontSize: 12.5,
           fontWeight: FontWeight.w600,
           color: AppColors.textMuted,
@@ -58,7 +62,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: const TextStyle(
+          textStyle: GoogleFonts.inter(
             fontSize: 15.5,
             fontWeight: FontWeight.w600,
           ),

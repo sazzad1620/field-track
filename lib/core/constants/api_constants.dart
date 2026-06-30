@@ -11,4 +11,5 @@ class ApiConstants {
 
   static const String locations = '/api/v1/locations';
   static const String todos = '/api/v1/todos';
+  static const String todosSync = '/api/v1/todos/sync';
 }
