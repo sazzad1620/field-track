@@ -91,7 +91,7 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
     LocationFormUseCurrentLocation event,
     Emitter<LocationFormState> emit,
   ) async {
-    emit(state.copyWith(status: LocationFormStatus.loading, clearError: true));
+    emit(state.copyWith(status: LocationFormStatus.locating, clearError: true));
     try {
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {

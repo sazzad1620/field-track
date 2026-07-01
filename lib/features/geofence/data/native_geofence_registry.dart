@@ -1,3 +1,4 @@
+import 'package:field_track/features/geofence/data/geofence_immediate_entry.dart';
 import 'package:field_track/features/geofence/data/geofence_location_cache.dart';
 import 'package:field_track/features/geofence/data/geofence_notify_state.dart';
 import 'package:field_track/features/geofence/data/geofence_permissions.dart';
@@ -48,6 +49,8 @@ class NativeGeofenceRegistry implements GeofenceRegistry {
     for (final location in active) {
       await _upsertGeofence(location);
     }
+
+    await GeofenceImmediateEntry.check(active);
   }
 
   Future<void> _upsertGeofence(Location location) async {

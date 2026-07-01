@@ -16,14 +16,16 @@ class LocationRepositoryImpl implements LocationRepository {
   });
 
   @override
-  Future<List<Location>> fetchLocations() async {
+  Future<List<Location>> fetchLocations({bool refreshGeofences = true}) async {
     final models = await remote.fetchLocations();
     final apiLocations = models.map((m) => m.toEntity()).toList();
     await local.syncActiveFromApi(apiLocations);
     final locations = _orderedLocations(await local.getAll(), apiLocations);
-    await geofenceRegistry.refresh(
-      locations.where((location) => location.isActive).toList(),
-    );
+    if (refreshGeofences) {
+      await geofenceRegistry.refresh(
+        locations.where((location) => location.isActive).toList(),
+      );
+    }
     return locations;
   }
 

@@ -103,8 +103,9 @@ class _LocationFormScreenState extends State<LocationFormScreen> {
           }
         },
         builder: (context, state) {
-          final saving = state.status == LocationFormStatus.saving ||
-              state.status == LocationFormStatus.loading;
+          final isLocating = state.status == LocationFormStatus.locating;
+          final saving = state.status == LocationFormStatus.saving;
+          final busy = isLocating || saving;
 
           return Scaffold(
             backgroundColor: AppColors.background,
@@ -176,13 +177,17 @@ class _LocationFormScreenState extends State<LocationFormScreen> {
                           if (!isEditing) ...[
                             const SizedBox(height: 4),
                             LocationDashedButton(
-                              onPressed: saving
+                              onPressed: busy
                                   ? null
                                   : () => context
                                       .read<LocationFormBloc>()
                                       .add(const LocationFormUseCurrentLocation()),
-                              icon: Icons.my_location_outlined,
-                              label: 'Use my current location',
+                              icon: isLocating
+                                  ? Icons.hourglass_empty
+                                  : Icons.my_location_outlined,
+                              label: isLocating
+                                  ? 'Getting location...'
+                                  : 'Use my current location',
                             ),
                           ],
                           const SizedBox(height: 14),
@@ -225,7 +230,7 @@ class _LocationFormScreenState extends State<LocationFormScreen> {
                           ),
                           GeofenceRadiusSlider(
                             value: _radiusM,
-                            onChanged: saving
+                            onChanged: busy
                                 ? null
                                 : (v) => setState(() => _radiusM = v),
                           ),
@@ -265,7 +270,7 @@ class _LocationFormScreenState extends State<LocationFormScreen> {
                                 ),
                                 LocationActiveSwitch(
                                   value: _isActive,
-                                  onChanged: saving
+                                  onChanged: busy
                                       ? null
                                       : (v) => setState(() => _isActive = v),
                                 ),
@@ -280,7 +285,7 @@ class _LocationFormScreenState extends State<LocationFormScreen> {
                                 children: [
                                   FilledButton(
                                     onPressed:
-                                        saving ? null : () => _submit(context),
+                                        busy ? null : () => _submit(context),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: AppColors.primary,
                                       foregroundColor: Colors.white,
@@ -311,7 +316,7 @@ class _LocationFormScreenState extends State<LocationFormScreen> {
                             )
                           else
                             FilledButton(
-                              onPressed: saving ? null : () => _submit(context),
+                              onPressed: busy ? null : () => _submit(context),
                               style: FilledButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,

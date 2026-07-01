@@ -40,10 +40,12 @@ class TodoListScreen extends StatelessWidget {
         return RefreshIndicator(
           color: AppColors.primary,
           onRefresh: () async {
-            context.read<TodoListBloc>().add(const TodoListRefreshRequested());
-            await context.read<TodoListBloc>().stream.firstWhere(
-                  (s) => s.status != TodoListStatus.loading,
-                );
+            final bloc = context.read<TodoListBloc>();
+            final done = bloc.stream.firstWhere(
+              (s) => s.status != TodoListStatus.loading,
+            );
+            bloc.add(const TodoListRefreshRequested());
+            await done;
           },
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),

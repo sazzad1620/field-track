@@ -66,12 +66,12 @@ class _LocationListScreenState extends State<LocationListScreen> {
             RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () async {
-                context
-                    .read<LocationListBloc>()
-                    .add(const LocationListRefreshRequested());
-                await context.read<LocationListBloc>().stream.firstWhere(
-                      (s) => s.status != LocationListStatus.loading,
-                    );
+                final bloc = context.read<LocationListBloc>();
+                final done = bloc.stream.firstWhere(
+                  (s) => s.status != LocationListStatus.loading,
+                );
+                bloc.add(const LocationListRefreshRequested());
+                await done;
               },
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),

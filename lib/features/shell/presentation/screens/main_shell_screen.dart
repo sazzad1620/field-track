@@ -1,10 +1,10 @@
-import 'package:field_track/core/constants/shell_layout.dart';
 import 'package:field_track/core/di/injection.dart';
 import 'package:field_track/core/router/app_routes.dart';
 import 'package:field_track/core/theme/app_colors.dart';
-import 'package:field_track/core/widgets/loading_view.dart';
 import 'package:field_track/core/widgets/nested_bottom_nav.dart';
+import 'package:field_track/features/geofence/domain/geofence_registry.dart';
 import 'package:field_track/features/home/presentation/bloc/home_bloc.dart';
+import 'package:field_track/features/locations/data/datasources/location_local_datasource.dart';
 import 'package:field_track/features/home/presentation/bloc/home_event.dart';
 import 'package:field_track/features/home/presentation/bloc/home_state.dart';
 import 'package:field_track/features/locations/presentation/bloc/location_list_bloc.dart';
@@ -12,6 +12,7 @@ import 'package:field_track/features/locations/presentation/bloc/location_list_e
 import 'package:field_track/features/locations/presentation/screens/location_list_screen.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_bloc.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_event.dart';
+import 'package:field_track/features/profile/presentation/screens/profile_screen.dart';
 import 'package:field_track/features/todos/presentation/screens/sync_screen.dart';
 import 'package:field_track/features/todos/presentation/screens/todo_list_screen.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,21 @@ class _MainShellScreenState extends State<MainShellScreen> {
     NestedBottomNavItem(label: 'Sync', icon: Icons.sync),
     NestedBottomNavItem(label: 'Profile', icon: Icons.person_outline),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshGeofences());
+  }
+
+  Future<void> _refreshGeofences() async {
+    final local = sl<LocationLocalDatasource>();
+    final registry = sl<GeofenceRegistry>();
+    final locations = await local.getAll();
+    await registry.refresh(
+      locations.where((location) => location.isActive).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +82,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                 TodoListScreen(),
                 LocationListScreen(),
                 SyncScreen(),
-                _ProfileTab(),
+                ProfileScreen(),
               ],
             ),
           ),
@@ -77,113 +93,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ProfileTab extends StatelessWidget {
-  const _ProfileTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
-      builder: (context, state) {
-        if (state.status == HomeStatus.loading) {
-          return const LoadingView();
-        }
-
-        final user = state.user;
-        final name = user?.name ?? 'User';
-        final email = user?.email ?? '';
-
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(
-            ShellLayout.contentHorizontalPadding,
-            8,
-            ShellLayout.contentHorizontalPadding,
-            20,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Profile',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 21,
-                  height: 25 / 21,
-                  letterSpacing: -0.42,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: AppColors.focusRing,
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (email.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        email,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => context.read<HomeBloc>().add(
-                        const HomeLogoutRequested(),
-                      ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text('Log out'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

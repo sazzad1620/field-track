@@ -110,6 +110,7 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
     TodoListRefreshRequested event,
     Emitter<TodoListState> emit,
   ) async {
+    emit(state.copyWith(status: TodoListStatus.loading, clearError: true));
     try {
       final todos = await repository.fetchAndCacheTodos();
       final sync = await _syncSnapshot();
@@ -126,7 +127,12 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(
+        state.copyWith(
+          status: TodoListStatus.loaded,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 

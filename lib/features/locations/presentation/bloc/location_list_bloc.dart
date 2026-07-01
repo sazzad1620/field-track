@@ -39,8 +39,10 @@ class LocationListBloc extends Bloc<LocationListEvent, LocationListState> {
     LocationListRefreshRequested event,
     Emitter<LocationListState> emit,
   ) async {
+    emit(state.copyWith(status: LocationListStatus.loading, clearError: true));
     try {
-      final locations = await repository.fetchLocations();
+      final locations =
+          await repository.fetchLocations(refreshGeofences: false);
       emit(
         state.copyWith(
           status: LocationListStatus.loaded,
@@ -49,7 +51,12 @@ class LocationListBloc extends Bloc<LocationListEvent, LocationListState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(
+        state.copyWith(
+          status: LocationListStatus.loaded,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 

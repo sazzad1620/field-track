@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum LocationFormStatus { initial, loading, saving, success, failure, deleted }
+enum LocationFormStatus { initial, locating, saving, success, failure, deleted }
 
 class LocationFormState extends Equatable {
   final LocationFormStatus status;
