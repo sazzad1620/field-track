@@ -38,3 +38,12 @@ class TodoToggled extends TodoListEvent {
 class TodoSyncRequested extends TodoListEvent {
   const TodoSyncRequested();
 }
+
+class TodoConnectivityUpdated extends TodoListEvent {
+  final bool isOnline;
+
+  const TodoConnectivityUpdated(this.isOnline);
+
+  @override
+  List<Object?> get props => [isOnline];
+}

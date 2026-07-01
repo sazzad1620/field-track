@@ -23,7 +23,7 @@ class LocationModel {
       locationName: json['location_name'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      radiusM: json['radius_m'] as int,
+      radiusM: (json['radius_m'] as num).toInt(),
       isActive: _parseIsActive(json['is_active']),
     );
   }

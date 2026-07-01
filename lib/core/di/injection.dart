@@ -7,6 +7,7 @@ import 'package:field_track/features/auth/data/datasources/auth_local_datasource
 import 'package:field_track/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:field_track/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:field_track/features/auth/domain/repositories/auth_repository.dart';
+import 'package:field_track/features/geofence/data/native_geofence_registry.dart';
 import 'package:field_track/features/geofence/domain/geofence_registry.dart';
 import 'package:field_track/features/locations/data/datasources/location_local_datasource.dart';
 import 'package:field_track/features/locations/data/datasources/location_remote_datasource.dart';
@@ -81,7 +82,7 @@ Future<void> setupInjection() async {
   }
 
   if (!sl.isRegistered<GeofenceRegistry>()) {
-    sl.registerLazySingleton<GeofenceRegistry>(GeofenceRegistryStub.new);
+    sl.registerLazySingleton<GeofenceRegistry>(NativeGeofenceRegistry.new);
   }
 
   if (!sl.isRegistered<LocationRemoteDatasource>()) {

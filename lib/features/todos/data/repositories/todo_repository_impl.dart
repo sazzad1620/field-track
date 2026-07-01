@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:field_track/core/utils/dio_error_message.dart';
 import 'package:field_track/features/todos/data/datasources/todo_local_datasource.dart';
 import 'package:field_track/features/todos/data/datasources/todo_remote_datasource.dart';
+import 'package:field_track/features/todos/domain/entities/pending_sync_todo.dart';
 import 'package:field_track/features/todos/domain/entities/todo.dart';
 import 'package:field_track/features/todos/domain/repositories/todo_repository.dart';
 
@@ -70,6 +71,7 @@ class TodoRepositoryImpl implements TodoRepository {
         );
         await local.markSynced(id);
         await local.removeFromQueue(id);
+        await local.setLastSyncedAt(DateTime.now().toUtc());
         return;
       } catch (_) {
         // Fall through to queue.
@@ -116,6 +118,7 @@ class TodoRepositoryImpl implements TodoRepository {
         await local.markSynced(item.todoId);
       }
       await local.clearQueue();
+      await local.setLastSyncedAt(DateTime.now().toUtc());
     } catch (e) {
       for (final item in pending) {
         await local.updateTodoLocal(
@@ -134,6 +137,24 @@ class TodoRepositoryImpl implements TodoRepository {
 
   @override
   Future<int> pendingCount() => local.pendingCount();
+
+  @override
+  Future<List<PendingSyncTodo>> getPendingSyncTodos() =>
+      local.getPendingSyncTodos();
+
+  @override
+  Future<bool> isOnline() => _isOnline();
+
+  @override
+  Future<DateTime?> getLastSyncedAt() => local.getLastSyncedAt();
+
+  @override
+  Stream<bool> watchOnline() async* {
+    yield await _isOnline();
+    await for (final _ in connectivity.onConnectivityChanged) {
+      yield await _isOnline();
+    }
+  }
 
   void dispose() {
     _connectivitySub?.cancel();

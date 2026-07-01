@@ -21,3 +21,11 @@ class PendingSyncItems extends Table {
   TextColumn get updatedAt => text()();
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
 }
+
+class SyncMeta extends Table {
+  IntColumn get id => integer()();
+  TextColumn get lastSyncedAt => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

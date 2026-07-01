@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:field_track/features/todos/domain/entities/pending_sync_todo.dart';
 import 'package:field_track/features/todos/domain/entities/todo.dart';
 import 'package:field_track/features/todos/domain/repositories/todo_repository.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_event.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
   final TodoRepository repository;
   StreamSubscription<void>? _reconnectSub;
+  StreamSubscription<bool>? _connectivitySub;
 
   TodoListBloc(this.repository) : super(const TodoListState()) {
     on<TodoListStarted>(_onStarted);
@@ -16,6 +18,40 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
     on<TodoFilterChanged>(_onFilterChanged);
     on<TodoToggled>(_onToggled);
     on<TodoSyncRequested>(_onSync);
+    on<TodoConnectivityUpdated>(_onConnectivityUpdated);
+  }
+
+  Future<({
+    int pendingCount,
+    List<PendingSyncTodo> pendingSyncTodos,
+    DateTime? lastSyncedAt,
+    bool isOffline,
+  })> _syncSnapshot() async {
+    final pendingSyncTodos = await repository.getPendingSyncTodos();
+    final lastSyncedAt = await repository.getLastSyncedAt();
+    final online = await repository.isOnline();
+    return (
+      pendingCount: pendingSyncTodos.length,
+      pendingSyncTodos: pendingSyncTodos,
+      lastSyncedAt: lastSyncedAt,
+      isOffline: !online,
+    );
+  }
+
+  void _listenConnectivity() {
+    _reconnectSub ??= repository.watchReconnect().listen((_) {
+      add(const TodoSyncRequested());
+    });
+    _connectivitySub ??= repository.watchOnline().listen((online) {
+      add(TodoConnectivityUpdated(online));
+    });
+  }
+
+  void _onConnectivityUpdated(
+    TodoConnectivityUpdated event,
+    Emitter<TodoListState> emit,
+  ) {
+    emit(state.copyWith(isOffline: !event.isOnline));
   }
 
   Future<void> _onStarted(
@@ -23,34 +59,39 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
     Emitter<TodoListState> emit,
   ) async {
     emit(state.copyWith(status: TodoListStatus.loading, clearError: true));
-    _reconnectSub ??= repository.watchReconnect().listen((_) {
-      add(const TodoSyncRequested());
-    });
+    _listenConnectivity();
 
     try {
       final todos = await repository.fetchAndCacheTodos();
-      final pending = await repository.pendingCount();
+      final sync = await _syncSnapshot();
       emit(
         state.copyWith(
           status: TodoListStatus.loaded,
           todos: todos,
-          pendingCount: pending,
-          syncStatus: _globalSync(pending, todos),
+          pendingCount: sync.pendingCount,
+          pendingSyncTodos: sync.pendingSyncTodos,
+          lastSyncedAt: sync.lastSyncedAt,
+          isOffline: sync.isOffline,
+          syncStatus: _globalSync(sync.pendingCount, todos),
         ),
       );
-      if (pending > 0) {
+      if (sync.pendingCount > 0) {
         add(const TodoSyncRequested());
       }
     } catch (e) {
       try {
         final todos = await repository.getLocalTodos();
-        final pending = await repository.pendingCount();
+        final sync = await _syncSnapshot();
         emit(
           state.copyWith(
-            status: todos.isEmpty ? TodoListStatus.failure : TodoListStatus.loaded,
+            status:
+                todos.isEmpty ? TodoListStatus.failure : TodoListStatus.loaded,
             todos: todos,
-            pendingCount: pending,
-            syncStatus: _globalSync(pending, todos),
+            pendingCount: sync.pendingCount,
+            pendingSyncTodos: sync.pendingSyncTodos,
+            lastSyncedAt: sync.lastSyncedAt,
+            isOffline: sync.isOffline,
+            syncStatus: _globalSync(sync.pendingCount, todos),
             errorMessage: todos.isEmpty ? e.toString() : null,
           ),
         );
@@ -71,13 +112,16 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
   ) async {
     try {
       final todos = await repository.fetchAndCacheTodos();
-      final pending = await repository.pendingCount();
+      final sync = await _syncSnapshot();
       emit(
         state.copyWith(
           status: TodoListStatus.loaded,
           todos: todos,
-          pendingCount: pending,
-          syncStatus: _globalSync(pending, todos),
+          pendingCount: sync.pendingCount,
+          pendingSyncTodos: sync.pendingSyncTodos,
+          lastSyncedAt: sync.lastSyncedAt,
+          isOffline: sync.isOffline,
+          syncStatus: _globalSync(sync.pendingCount, todos),
           clearError: true,
         ),
       );
@@ -90,7 +134,10 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
     emit(state.copyWith(filter: event.filter));
   }
 
-  Future<void> _onToggled(TodoToggled event, Emitter<TodoListState> emit) async {
+  Future<void> _onToggled(
+    TodoToggled event,
+    Emitter<TodoListState> emit,
+  ) async {
     final updated = state.todos.map((t) {
       if (t.id == event.id) {
         return t.copyWith(
@@ -102,11 +149,10 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
       return t;
     }).toList();
 
-    final pending = state.pendingCount + 1;
     emit(
       state.copyWith(
         todos: updated,
-        pendingCount: pending,
+        pendingCount: state.pendingCount + 1,
         syncStatus: GlobalSyncStatus.pending,
       ),
     );
@@ -114,24 +160,29 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
     try {
       await repository.toggleTodo(event.id, event.isCompleted);
       final todos = await repository.getLocalTodos();
-      final count = await repository.pendingCount();
+      final sync = await _syncSnapshot();
       emit(
         state.copyWith(
           todos: todos,
-          pendingCount: count,
-          syncStatus: _globalSync(count, todos),
+          pendingCount: sync.pendingCount,
+          pendingSyncTodos: sync.pendingSyncTodos,
+          lastSyncedAt: sync.lastSyncedAt,
+          isOffline: sync.isOffline,
+          syncStatus: _globalSync(sync.pendingCount, todos),
         ),
       );
-      if (count > 0) {
+      if (sync.pendingCount > 0) {
         add(const TodoSyncRequested());
       }
     } catch (e) {
       final todos = await repository.getLocalTodos();
-      final count = await repository.pendingCount();
+      final sync = await _syncSnapshot();
       emit(
         state.copyWith(
           todos: todos,
-          pendingCount: count,
+          pendingCount: sync.pendingCount,
+          pendingSyncTodos: sync.pendingSyncTodos,
+          isOffline: sync.isOffline,
           syncStatus: GlobalSyncStatus.error,
           errorMessage: e.toString(),
         ),
@@ -143,9 +194,29 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
     TodoSyncRequested event,
     Emitter<TodoListState> emit,
   ) async {
-    final pending = await repository.pendingCount();
-    if (pending == 0) {
-      emit(state.copyWith(syncStatus: GlobalSyncStatus.synced, pendingCount: 0));
+    final sync = await _syncSnapshot();
+    if (sync.pendingCount == 0) {
+      emit(
+        state.copyWith(
+          syncStatus: GlobalSyncStatus.synced,
+          pendingCount: 0,
+          pendingSyncTodos: const [],
+          lastSyncedAt: sync.lastSyncedAt,
+          isOffline: sync.isOffline,
+        ),
+      );
+      return;
+    }
+
+    if (sync.isOffline) {
+      emit(
+        state.copyWith(
+          pendingCount: sync.pendingCount,
+          pendingSyncTodos: sync.pendingSyncTodos,
+          isOffline: true,
+          syncStatus: GlobalSyncStatus.pending,
+        ),
+      );
       return;
     }
 
@@ -154,21 +225,27 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
     try {
       await repository.syncPending();
       final todos = await repository.getLocalTodos();
+      final afterSync = await _syncSnapshot();
       emit(
         state.copyWith(
           todos: todos,
-          pendingCount: 0,
+          pendingCount: afterSync.pendingCount,
+          pendingSyncTodos: afterSync.pendingSyncTodos,
+          lastSyncedAt: afterSync.lastSyncedAt,
+          isOffline: afterSync.isOffline,
           syncStatus: GlobalSyncStatus.synced,
           clearError: true,
         ),
       );
     } catch (e) {
       final todos = await repository.getLocalTodos();
-      final count = await repository.pendingCount();
+      final afterSync = await _syncSnapshot();
       emit(
         state.copyWith(
           todos: todos,
-          pendingCount: count,
+          pendingCount: afterSync.pendingCount,
+          pendingSyncTodos: afterSync.pendingSyncTodos,
+          isOffline: afterSync.isOffline,
           syncStatus: GlobalSyncStatus.error,
           errorMessage: e.toString(),
         ),
@@ -190,6 +267,7 @@ class TodoListBloc extends Bloc<TodoListEvent, TodoListState> {
   @override
   Future<void> close() {
     _reconnectSub?.cancel();
+    _connectivitySub?.cancel();
     return super.close();
   }
 }

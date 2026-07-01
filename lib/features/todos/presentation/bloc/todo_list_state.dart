@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:field_track/features/todos/domain/entities/pending_sync_todo.dart';
 import 'package:field_track/features/todos/domain/entities/todo.dart';
 
 enum TodoListStatus { initial, loading, loaded, failure }
@@ -11,6 +12,9 @@ class TodoListState extends Equatable {
   final TodoFilter filter;
   final GlobalSyncStatus syncStatus;
   final int pendingCount;
+  final List<PendingSyncTodo> pendingSyncTodos;
+  final bool isOffline;
+  final DateTime? lastSyncedAt;
   final String? errorMessage;
 
   const TodoListState({
@@ -19,6 +23,9 @@ class TodoListState extends Equatable {
     this.filter = TodoFilter.all,
     this.syncStatus = GlobalSyncStatus.synced,
     this.pendingCount = 0,
+    this.pendingSyncTodos = const [],
+    this.isOffline = false,
+    this.lastSyncedAt,
     this.errorMessage,
   });
 
@@ -52,6 +59,10 @@ class TodoListState extends Equatable {
     TodoFilter? filter,
     GlobalSyncStatus? syncStatus,
     int? pendingCount,
+    List<PendingSyncTodo>? pendingSyncTodos,
+    bool? isOffline,
+    DateTime? lastSyncedAt,
+    bool clearLastSyncedAt = false,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -61,6 +72,10 @@ class TodoListState extends Equatable {
       filter: filter ?? this.filter,
       syncStatus: syncStatus ?? this.syncStatus,
       pendingCount: pendingCount ?? this.pendingCount,
+      pendingSyncTodos: pendingSyncTodos ?? this.pendingSyncTodos,
+      isOffline: isOffline ?? this.isOffline,
+      lastSyncedAt:
+          clearLastSyncedAt ? null : (lastSyncedAt ?? this.lastSyncedAt),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -72,6 +87,9 @@ class TodoListState extends Equatable {
         filter,
         syncStatus,
         pendingCount,
+        pendingSyncTodos,
+        isOffline,
+        lastSyncedAt,
         errorMessage,
       ];
 }

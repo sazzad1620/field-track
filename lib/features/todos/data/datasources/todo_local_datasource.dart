@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:field_track/features/todos/data/database/app_database.dart';
 import 'package:field_track/features/todos/data/models/todo_model.dart';
+import 'package:field_track/features/todos/domain/entities/pending_sync_todo.dart';
 import 'package:field_track/features/todos/domain/entities/todo.dart';
 
 class TodoLocalDatasource {
@@ -94,5 +95,39 @@ class TodoLocalDatasource {
 
   Future<void> clearQueue() async {
     await db.delete(db.pendingSyncItems).go();
+  }
+
+  Future<List<PendingSyncTodo>> getPendingSyncTodos() async {
+    final pending = await getPendingItems();
+    if (pending.isEmpty) return const [];
+
+    final todos = await getTodos();
+    final titles = {for (final todo in todos) todo.id: todo.title};
+
+    return pending
+        .map(
+          (item) => PendingSyncTodo(
+            todoId: item.todoId,
+            title: titles[item.todoId] ?? 'Task',
+            isCompleted: item.isCompleted,
+            updatedAt: item.updatedAt,
+          ),
+        )
+        .toList();
+  }
+
+  Future<DateTime?> getLastSyncedAt() async {
+    final row = await (db.select(db.syncMeta)
+          ..where((meta) => meta.id.equals(1)))
+        .getSingleOrNull();
+    final value = row?.lastSyncedAt;
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
+  }
+
+  Future<void> setLastSyncedAt(DateTime at) async {
+    await (db.update(db.syncMeta)..where((meta) => meta.id.equals(1))).write(
+      SyncMetaCompanion(lastSyncedAt: Value(at.toUtc().toIso8601String())),
+    );
   }
 }

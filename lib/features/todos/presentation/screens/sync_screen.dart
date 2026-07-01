@@ -3,164 +3,142 @@ import 'package:field_track/core/theme/app_colors.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_bloc.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_event.dart';
 import 'package:field_track/features/todos/presentation/bloc/todo_list_state.dart';
+import 'package:field_track/features/todos/presentation/widgets/sync_offline_banner.dart';
+import 'package:field_track/features/todos/presentation/widgets/sync_pending_todo_card.dart';
+import 'package:field_track/features/todos/presentation/widgets/sync_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SyncScreen extends StatelessWidget {
   const SyncScreen({super.key});
 
+  static const _horizontalPadding = ShellLayout.contentHorizontalPadding;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TodoListBloc, TodoListState>(
       builder: (context, state) {
-        final (icon, color, title, subtitle) = _syncInfo(state);
+        final isSyncing = state.syncStatus == GlobalSyncStatus.syncing;
 
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(
-            ShellLayout.contentHorizontalPadding,
-            8,
-            ShellLayout.contentHorizontalPadding,
-            20,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Sync',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 21,
-                      color: AppColors.textPrimary,
-                    ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x0F141C28),
-                      offset: Offset(0, 1),
-                      blurRadius: 2,
-                    ),
-                    BoxShadow(
-                      color: Color(0x0D141C28),
-                      offset: Offset(0, 6),
-                      blurRadius: 16,
-                    ),
-                  ],
+        return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  _horizontalPadding,
+                  8,
+                  _horizontalPadding,
+                  14,
                 ),
-                child: Column(
-                  children: [
-                    Icon(icon, size: 48, color: color),
-                    const SizedBox(height: 12),
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                    if (state.pendingCount > 0) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        '${state.pendingCount} change(s) waiting to sync',
+                child: const Text(
+                  'Sync',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 21,
+                    height: 25 / 21,
+                    letterSpacing: -0.42,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                _horizontalPadding,
+                0,
+                _horizontalPadding,
+                92,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  if (state.isOffline) ...[
+                    const SyncOfflineBanner(),
+                    const SizedBox(height: 10),
+                  ],
+                  SyncSummaryCard(
+                    pendingCount: state.pendingCount,
+                    lastSyncedAt: state.lastSyncedAt,
+                  ),
+                  if (state.pendingSyncTodos.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 6, bottom: 10),
+                      child: Text(
+                        'WAITING TO UPLOAD',
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.pendingBadgeText,
-                        ),
-                      ),
-                    ],
-                    if (state.errorMessage != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        state.errorMessage!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: state.syncStatus == GlobalSyncStatus.syncing
-                            ? null
-                            : () => context
-                                .read<TodoListBloc>()
-                                .add(const TodoSyncRequested()),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          state.syncStatus == GlobalSyncStatus.syncing
-                              ? 'Syncing...'
-                              : 'Sync now',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          height: 15 / 12,
+                          letterSpacing: 0.6,
+                          color: AppColors.placeholder,
                         ),
                       ),
                     ),
+                    for (var i = 0; i < state.pendingSyncTodos.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 10),
+                      SyncPendingTodoCard(
+                        item: state.pendingSyncTodos[i],
+                        icon: syncPendingIcons[i % syncPendingIcons.length],
+                      ),
+                    ],
                   ],
-                ),
+                  if (state.errorMessage != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      state.errorMessage!,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: FilledButton.icon(
+                      onPressed: isSyncing
+                          ? null
+                          : () => context
+                              .read<TodoListBloc>()
+                              .add(const TodoSyncRequested()),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        disabledBackgroundColor:
+                            AppColors.primary.withValues(alpha: 0.6),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      icon: isSyncing
+                          ? const SizedBox(
+                              width: 19,
+                              height: 19,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.sync_rounded, size: 19),
+                      label: Text(
+                        isSyncing ? 'Syncing...' : 'Sync now',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.5,
+                          height: 19 / 15.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
-  }
-
-  (IconData, Color, String, String) _syncInfo(TodoListState state) {
-    switch (state.syncStatus) {
-      case GlobalSyncStatus.syncing:
-        return (
-          Icons.sync,
-          AppColors.primary,
-          'Syncing',
-          'Uploading your offline changes...',
-        );
-      case GlobalSyncStatus.pending:
-        return (
-          Icons.cloud_upload_outlined,
-          AppColors.pendingBadgeText,
-          'Pending sync',
-          'Changes are saved locally and will sync when online.',
-        );
-      case GlobalSyncStatus.error:
-        return (
-          Icons.error_outline,
-          AppColors.error,
-          'Sync failed',
-          'Tap sync now to retry.',
-        );
-      case GlobalSyncStatus.synced:
-        return (
-          Icons.cloud_done_outlined,
-          AppColors.success,
-          'All synced',
-          'Your tasks are up to date with the server.',
-        );
-    }
   }
 }
