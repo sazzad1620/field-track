@@ -39,13 +39,14 @@ String formatTodoTime(String? iso, {required bool isCompleted}) {
   return '$prefix $hour:$minute $period';
 }
 
-String formatMarkedDoneTime(String? iso) {
+String formatPendingSyncTime(String? iso, {required bool isCompleted}) {
   if (iso == null || iso.isEmpty) return '';
   final dt = DateTime.parse(iso).toLocal();
   final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
   final minute = dt.minute.toString().padLeft(2, '0');
   final period = dt.hour >= 12 ? 'PM' : 'AM';
-  return 'Marked done · $hour:$minute $period';
+  final label = isCompleted ? 'Marked done' : 'Marked undone';
+  return '$label · $hour:$minute $period';
 }
 
 String formatLastSynced(DateTime? at) {

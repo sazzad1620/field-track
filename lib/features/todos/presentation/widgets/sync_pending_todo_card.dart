@@ -54,7 +54,10 @@ class SyncPendingTodoCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      formatMarkedDoneTime(item.updatedAt),
+                      formatPendingSyncTime(
+                        item.updatedAt,
+                        isCompleted: item.isCompleted,
+                      ),
                       style: const TextStyle(
                         fontWeight: FontWeight.w400,
                         fontSize: 12,

@@ -173,7 +173,10 @@ class _LocationFormScreenState extends State<LocationFormScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          LocationMapPreview(isEditing: isEditing),
+                          LocationMapPreview(
+                            isEditing: isEditing,
+                            radiusM: _radiusM,
+                          ),
                           if (!isEditing) ...[
                             const SizedBox(height: 4),
                             LocationDashedButton(
